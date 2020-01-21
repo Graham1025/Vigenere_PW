@@ -1,0 +1,214 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+typedef struct CDuLNode {
+	int data;
+	struct CDuLNode *prior;
+	struct CDuLNode *next;
+} CDuLNode, *CDuLinkList;
+
+typedef struct LNode {
+	int data;
+	struct LNode *next;
+} LNode, *LinkList;
+
+void Create_Joseph_Ring(CDuLinkList *L) {
+	int i, j, one;
+	//定义一个结构体类型的指针变量
+	CDuLinkList p;
+	//尾插法需要增加一个指向尾部的指针
+	CDuLinkList t;
+	printf("请输入循环元素的个数：");
+	scanf("%d", &j);
+	getchar();
+	//CDuLNode在引入参数时就进行了定义，此时分配CDuLNode个存储空间
+	*L = (CDuLinkList)malloc(sizeof(CDuLNode));
+	//定义为空的循环链表
+	(*L)->next = *L;
+	(*L)->prior = *L;
+	t = *L;
+	printf("\n请按1开始创建循环链表：");
+	scanf("%d", &one);
+	getchar();
+	//尾插法创建循环链表
+	for (i = 0; i < j; i++) {
+		p = (CDuLinkList)malloc(sizeof(CDuLNode));
+		p->data = i + 65;
+		p->next = t->next;
+		t->next->prior = p;
+		p->prior = t;
+		t->next = p;
+		//这一步很关键，始终保证该指针指向尾部
+		t = p;
+	}
+	//删除循环链表头节点,仍然保证是双向循环链表
+	t->next = (*L)->next;
+	(*L)->next->prior = t;
+	t = *L;
+	*L = (*L)->next;
+	free(t);
+}
+
+void Create_LinkList(LinkList *V) {
+	char c;
+	//printf("\n请输入创建密码的位数：");
+	//scanf("%d", &j);
+	//尾插法创建链表
+	//LNode在引入参数时就进行了定义，此时分配LNode个存储空间
+	*V = (LinkList)malloc(sizeof(LNode));
+	(*V)->next = NULL;
+	//定义一个结构体类型的指针变量
+	LinkList p;
+	//尾插法需要增加一个指向尾部的指针
+	LinkList t = *V;
+	printf("\n请依次输入你的密码,并用#表示结束：\n");
+	//scanf此时和getchar()效果是一样的，具体关乎缓存、标准输入及输出流等，后面深入分析，scanf,puts,gets,getchar
+	scanf("%c", &c);
+	//c = getchar();
+	while (c != '#') {
+		/*if (c == 10) {
+			scanf("%c", &c);
+			continue;
+		}*/
+		p = (LinkList)malloc(sizeof(LNode));
+		p->data = c;
+		p->next = t->next;
+		t->next = p;
+		t = p;
+		scanf("%c", &c);
+		//c = getchar();
+	}
+	getchar();
+	/*下面是错误很多次的代码，得总结一下为什么？*/
+	//for (i = 0; i < j; i++) {
+	//	//printf("请依次输入你的密码\n");
+	//	p = (LinkList)malloc(sizeof(LNode));
+	//	scanf("%c",&c);
+	//	p->data = getchar();
+	//	p->next = t->next;
+	//	t->next = p;
+	//	t = p;
+	//}
+	//t->next = NULL;
+}
+
+//含头节点单链表遍历
+void Through_List2(LinkList T) {
+	while (T->next) {
+		printf("%c ", T->next->data);
+		T = T->next;
+	}
+	printf("\n");
+}
+
+//创建随机加密链表
+void Create_rand_list(LinkList *Key, LinkList V) {
+	LinkList p;
+	LinkList t;
+	*Key = (LinkList)malloc(sizeof(LNode));
+	(*Key)->next = NULL;
+	t = (*Key);
+	while (V->next != NULL) {
+		p=(LinkList)malloc(sizeof(LNode));
+		p->data = rand() % 101 - 50;
+		p->next = t->next;
+		t->next = p;
+		t = p;
+		V = V->next;
+	}
+}
+
+//随机密钥链表遍历
+void Through_List3(LinkList T) {
+	while (T->next) {
+		printf("%d ", T->next->data);
+		T = T->next;
+	}
+	printf("\n");
+}
+
+//无头结点双向循环列表的遍历
+void Through_List(CDuLinkList T) {
+	int i = 0;
+	//int num = 0;
+	CDuLinkList t;
+	t = T;
+	printf("\n遍历链表如下：\n");
+	do{
+		printf("%c ", T->data);
+		//num++;
+		T = T->next;
+	} while (T != t);
+	printf("\n");
+	//return(num);
+}
+
+int move_caeser_value_in_circle(CDuLinkList D, int M) {
+	int i;
+	if (M > 0) {
+		for (i = 0; i < M; i++) {
+			D= D->next;
+		}
+	}
+	else {
+		M = abs(M);
+		for (i = 0; i < M; i++) {
+			D = D->prior;
+		}
+	}
+	return D->data;
+}
+
+Vigenere_pw(LinkList *Vig, LinkList V, LinkList Key ,CDuLinkList H) {
+	LinkList p;
+	LinkList t;
+	int num;
+	*Vig = (LinkList)malloc(sizeof(LNode));
+	(*Vig)->next = NULL;
+	t = (*Vig);
+	while (V->next != NULL) {
+		p = (LinkList)malloc(sizeof(LNode));
+		num = V->next->data - 65 + Key->next->data;
+		p->data = move_caeser_value_in_circle(H, num);
+		p->next = t->next;
+		t->next = p;
+		t = p;
+		V = V->next;
+		Key = Key->next;
+	}
+}
+
+int main()
+{
+	CDuLinkList h;
+	LinkList v;
+	LinkList key;
+	LinkList vig;
+	//创建26个大写字母循环链表
+	Create_Joseph_Ring(&h);
+
+	//遍历26个大写字母循环链表
+	Through_List(h);
+
+	//创建明文链表
+	Create_LinkList(&v);
+	
+	//遍历明文链表
+	printf("\n明文如下：\n");
+	Through_List2(v);
+
+	//创建随机密钥链表
+	Create_rand_list(&key, v);
+	printf("\n随机密钥如下：\n");
+	Through_List3(key);
+
+	//生成维吉尼亚密码
+	Vigenere_pw(&vig, v, key, h);
+	printf("\n维吉尼亚密文如下：\n");
+	Through_List2(vig);
+
+	printf("\n");
+	getchar();
+	return 0;
+}
